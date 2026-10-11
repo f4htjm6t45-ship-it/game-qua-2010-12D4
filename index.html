@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Câu Quà 20/10</title>
+  <style>
+    :root{--pink:#e94e8a;--deep:#8d2454;--bg:#fff7fb;--ink:#30232a;--muted:#766773;--line:#f0d6e2}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#fff2f8,#fffafc 48%,#fff);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+    .wrap{max-width:760px;margin:0 auto;padding:22px 15px 48px}.hero{text-align:center;padding:22px 12px 16px}
+    .emoji{font-size:44px}.hero h1{font-size:clamp(28px,6vw,42px);margin:5px 0;color:var(--deep)}.hero p{margin:0;color:var(--muted)}
+    .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 7px 22px #7b28500c}
+    h2{font-size:20px;margin:0 0 12px} label{display:block;font-size:14px;font-weight:650;margin:11px 0 5px}
+    input,textarea{font:inherit;width:100%;padding:12px 13px;border:1px solid #e3c8d5;border-radius:11px;background:#fff;color:var(--ink)}
+    textarea{min-height:170px;resize:vertical} button{font:inherit;font-weight:700;border:0;border-radius:11px;padding:12px 16px;background:var(--pink);color:#fff;cursor:pointer;margin-top:12px}
+    button.secondary{background:#f8e5ef;color:var(--deep)}button:disabled{opacity:.55;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}
+    .status{padding:11px 13px;background:#fff0f6;border-radius:10px;color:var(--deep);white-space:pre-wrap;margin:12px 0}.small{font-size:13px;color:var(--muted)}
+    .hidden{display:none!important}.pill{display:inline-block;border-radius:99px;background:#fae5ef;color:var(--deep);padding:5px 10px;font-size:13px;font-weight:700}
+    ul{padding-left:20px}li{margin:5px 0}.gift{font-size:clamp(24px,5vw,34px);font-weight:800;color:var(--deep);text-align:center;padding:22px 8px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{flex:1;min-width:120px}.footer{text-align:center;font-size:12px;color:#927d89;margin-top:22px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="emoji">🎣🎁🌸</div>
+    <h1>Câu Quà 20/10</h1>
+    <p>Mỗi người một lượt câu — món quà bất ngờ dành cho bạn!</p>
+  </header>
+
+  <div id="setupNotice" class="status">Trước khi chơi: hãy điền Supabase URL và Publishable key vào phần cấu hình trong file này.</div>
+
+  <section class="card">
+    <div class="tabs">
+      <button id="showPlayer" type="button">🎁 Người chơi</button>
+      <button id="showAdmin" type="button" class="secondary">🔐 Lớp trưởng</button>
+    </div>
+  </section>
+
+  <section id="playerPanel" class="card">
+    <h2>Vào phòng chơi</h2>
+    <label for="roomCode">Mã phòng</label>
+    <input id="roomCode" placeholder="Ví dụ: QUA2010" maxlength="20" autocomplete="off">
+    <label for="playerName">Tên của bạn</label>
+    <input id="playerName" placeholder="Nhập tên (tối đa 32 ký tự)" maxlength="32" autocomplete="name">
+    <button id="joinBtn" type="button">Vào phòng</button>
+    <div id="playerStatus" class="status hidden" role="status"></div>
+    <div id="gameArea" class="hidden">
+      <p><span class="pill" id="roomStatusPill">Đang chờ lớp trưởng</span></p>
+      <h2>Người chơi trong phòng</h2>
+      <div id="playersList" class="small">Đang tải danh sách...</div>
+      <button id="claimBtn" type="button" disabled>🎣 Thả cần câu quà</button>
+      <div id="giftResult" class="gift hidden" aria-live="polite"></div>
+      <p class="small">Mỗi tài khoản trên thiết bị này chỉ có một lượt nhận quà. Hãy chụp màn hình kết quả sau khi câu được quà.</p>
+    </div>
+  </section>
+
+  <section id="adminPanel" class="card hidden">
+    <h2>Đăng nhập lớp trưởng</h2>
+    <label for="adminEmail">Email</label>
+    <input id="adminEmail" type="email" placeholder="Email tài khoản lớp trưởng" autocomplete="username">
+    <label for="adminPassword">Mật khẩu</label>
+    <input id="adminPassword" type="password" placeholder="Mật khẩu" autocomplete="current-password">
+    <button id="loginBtn" type="button">Đăng nhập</button>
+    <button id="logoutBtn" type="button" class="secondary hidden">Đăng xuất</button>
+    <div id="adminStatus" class="status hidden" role="status"></div>
+    <div id="createRoomArea" class="hidden">
+      <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+      <h2>Tạo phòng và 35 món quà</h2>
+      <label for="roomTitle">Tên phòng</label>
+      <input id="roomTitle" value="Câu Quà 20/10">
+      <label for="newRoomCode">Mã phòng (chữ/số, không dấu)</label>
+      <input id="newRoomCode" value="QUA2010" maxlength="20">
+      <label for="giftLines">Danh sách 35 món quà — mỗi dòng một món</label>
+      <textarea id="giftLines" placeholder="Ví dụ:&#10;Gấu bông nhỏ&#10;Móc khóa dễ thương&#10;Sổ tay&#10;..."></textarea>
+      <p class="small">Nhập đúng 35 dòng không trống. Tên quà không nên chứa thông tin riêng tư.</p>
+      <button id="createRoomBtn" type="button">Tạo phòng + 35 món quà</button>
+      <div id="roomAdminArea" class="hidden">
+        <div class="status" id="adminRoomSummary"></div>
+        <button id="startBtn" type="button">🚀 Bắt đầu câu quà</button>
+        <h2 style="margin-top:20px">Người chơi đã vào phòng</h2>
+        <div id="adminPlayersList" class="small">Chưa có người chơi.</div>
+      </div>
+    </div>
+  </section>
+  <div class="footer">Câu Quà 20/10 · Hãy chơi vui vẻ và tôn trọng nhau 🌷</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= CẤU HÌNH =================
+   Thay hai giá trị bên dưới bằng thông tin trong Supabase > Connect:
+   SUPABASE_URL = Supabase URL
+   SUPABASE_ANON_KEY = Supabase Publishable key
+   Không bao giờ đặt Secret key hoặc service_role key trong file này.
+*/
+const SUPABASE_URL = "https://uwnrrslaytgxnaciavvh.supabase.com";
+const SUPABASE_ANON_KEY = "sb_publishable_cD0teAPhJR6p2kWXcP8YXA_Wx0hMZUB";
+/* ============================================ */
+
+const $ = (id) => document.getElementById(id);
+let supabaseClient = null;
+let currentRoom = null, currentPlayer = null, currentToken = null;
+let roomChannel = null, playersChannel = null, adminRoom = null;
+const storagePrefix = "cauqua2010:";
+function showStatus(id, message, show=true){ const el=$(id); el.textContent=message; el.classList.toggle("hidden",!show); }
+function configured(){
+  return SUPABASE_URL.startsWith("https://") &&
+    !SUPABASE_URL.includes("DAN_PROJECT_URL") &&
+    SUPABASE_ANON_KEY.length > 20 &&
+    !SUPABASE_ANON_KEY.includes("DAN_ANON_PUBLIC_KEY");
+}
+function init(){
+  if (!window.supabase || !configured()){
+    $("setupNotice").textContent = "Chưa cấu hình Supabase. Hãy thay hai giá trị SUPABASE_URL và SUPABASE_ANON_KEY trong mã nguồn bằng thông tin thật, rồi lưu file.";
+    return;
+  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  $("setupNotice").textContent = "Đã điền cấu hình Supabase trong file. Bạn có thể đăng nhập lớp trưởng hoặc vào phòng chơi.";
+}
+$("showPlayer").onclick=()=>{ $("playerPanel").classList.remove("hidden"); $("adminPanel").classList.add("hidden"); };
+$("showAdmin").onclick=()=>{ $("adminPanel").classList.remove("hidden"); $("playerPanel").classList.add("hidden"); };
+$("loginBtn").onclick=async()=>{
+  if(!supabaseClient){showStatus("adminStatus","Bạn cần điền Supabase URL và Publishable key vào file trước.");return;}
+  const email=$("adminEmail").value.trim(), password=$("adminPassword").value;
+  if(!email||!password){showStatus("adminStatus","Hãy nhập email và mật khẩu.");return;}
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){showStatus("adminStatus","Đăng nhập chưa thành công: "+error.message);return;}
+  showStatus("adminStatus","Đăng nhập thành công."); $("logoutBtn").classList.remove("hidden"); $("createRoomArea").classList.remove("hidden");
+};
+$("logoutBtn").onclick=async()=>{await supabaseClient.auth.signOut();$("createRoomArea").classList.add("hidden");$("logoutBtn").classList.add("hidden");showStatus("adminStatus","Đã đăng xuất.");};
+$("createRoomBtn").onclick=async()=>{
+  if(!supabaseClient){showStatus("adminStatus","Chưa cấu hình Supabase.");return;}
+  const {data:{user},error:userError}=await supabaseClient.auth.getUser();
+  if(userError||!user){showStatus("adminStatus","Phiên đăng nhập hết hạn. Hãy đăng nhập lại.");return;}
+  const code=$("newRoomCode").value.trim().toUpperCase();
+  const title=$("roomTitle").value.trim()||"Câu Quà 20/10";
+  const gifts=$("giftLines").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(!/^[A-Z0-9_-]{3,20}$/.test(code)){showStatus("adminStatus","Mã phòng cần dài 3–20 ký tự, chỉ gồm chữ không dấu, số, gạch ngang hoặc gạch dưới.");return;}
+  if(gifts.length!==35){showStatus("adminStatus","Bạn đang nhập "+gifts.length+" món quà. Vui lòng nhập đúng 35 dòng không trống.");return;}
+  if(gifts.some(g=>g.length>160)){showStatus("adminStatus","Tên mỗi món quà không được dài quá 160 ký tự.");return;}
+  $("createRoomBtn").disabled=true;
+  try{
+    const {data:room,error:roomError}=await supabaseClient.from("rooms").insert({room_code:code,title,owner_id:user.id}).select().single();
+    if(roomError) throw roomError;
+    const rows=gifts.map(g=>({room_id:room.id,gift_name:g}));
+    const {error:giftError}=await supabaseClient.from("gifts").insert(rows);
+    if(giftError){await supabaseClient.from("rooms").delete().eq("id",room.id);throw giftError;}
+    adminRoom=room;
+    $("roomAdminArea").classList.remove("hidden");
+    $("adminRoomSummary").textContent="Đã tạo phòng "+room.room_code+". Trạng thái: chờ bắt đầu. Gửi mã phòng này cho người chơi.";
+    await refreshAdminPlayers();
+    watchAdminRoom(room.id);
+    showStatus("adminStatus","Tạo phòng và 35 món quà thành công.");
+  }catch(e){showStatus("adminStatus","Không tạo được phòng: "+(e.message||String(e)));}
+  finally{$("createRoomBtn").disabled=false;}
+};
+$("startBtn").onclick=async()=>{
+  if(!adminRoom)return;
+  const {error}=await supabaseClient.from("rooms").update({status:"playing"}).eq("id",adminRoom.id);
+  if(error)showStatus("adminStatus","Không thể bắt đầu: "+error.message);
+  else{showStatus("adminStatus","Phòng đã bắt đầu! Người chơi có thể thả cần.");$("startBtn").disabled=true;}
+};
+async function refreshAdminPlayers(){
+  if(!adminRoom)return;
+  const {data,error}=await supabaseClient.from("players").select("player_name,won_gift_name,joined_at").eq("room_id",adminRoom.id).order("joined_at");
+  if(error){$("adminPlayersList").textContent="Không tải được danh sách: "+error.message;return;}
+  $("adminPlayersList").innerHTML="";
+  if(!data.length){$("adminPlayersList").textContent="Chưa có người chơi.";return;}
+  const ul=document.createElement("ul");
+  data.forEach(p=>{const li=document.createElement("li");li.textContent=p.player_name+(p.won_gift_name?" — đã nhận quà":" — đang chờ");ul.appendChild(li);});
+  $("adminPlayersList").appendChild(ul);
+}
+function watchAdminRoom(roomId){
+  supabaseClient.channel("admin-players-"+roomId).on("postgres_changes",{event:"*",schema:"public",table:"players",filter:"room_id=eq."+roomId},refreshAdminPlayers).subscribe();
+}
+$("joinBtn").onclick=async()=>{
+  if(!supabaseClient){showStatus("playerStatus","Chưa cấu hình Supabase trong file index.html.");return;}
+  const code=$("roomCode").value.trim().toUpperCase(), name=$("playerName").value.trim();
+  if(!code||!name){showStatus("playerStatus","Hãy nhập mã phòng và tên của bạn.");return;}
+  if(name.length>32){showStatus("playerStatus","Tên tối đa 32 ký tự.");return;}
+  $("joinBtn").disabled=true;
+  try{
+    const {data:room,error:roomError}=await supabaseClient.from("rooms").select("id,room_code,title,status").eq("room_code",code).maybeSingle();
+    if(roomError)throw roomError;
+    if(!room)throw new Error("Không tìm thấy phòng. Hãy kiểm tra mã phòng với lớp trưởng.");
+    if(room.status==="finished")throw new Error("Phòng này đã kết thúc.");
+    const storageKey=storagePrefix+code+":"+name.toLocaleLowerCase("vi");
+    let saved=null;try{saved=JSON.parse(localStorage.getItem(storageKey)||"null");}catch(_){}
+    if(saved && saved.playerId && saved.token){
+      const {data:existing}=await supabaseClient.from("players").select("id,player_name,won_gift_name,room_id").eq("id",saved.playerId).eq("room_id",room.id).maybeSingle();
+      if(existing){currentRoom=room;currentPlayer=existing;currentToken=saved.token;enterGame();return;}
+    }
+    const {data:player,error:playerError}=await supabaseClient.from("players").insert({room_id:room.id,player_name:name}).select("id,player_name,won_gift_name,room_id").single();
+    if(playerError)throw playerError;
+    const token=crypto.randomUUID();
+    const {error:secretError}=await supabaseClient.from("player_secrets").insert({player_id:player.id,token});
+    if(secretError){throw new Error("Đã tạo người chơi nhưng không tạo được phiên riêng: "+secretError.message);}
+    localStorage.setItem(storageKey,JSON.stringify({playerId:player.id,token}));
+    currentRoom=room;currentPlayer=player;currentToken=token;enterGame();
+  }catch(e){showStatus("playerStatus",e.message||String(e));}
+  finally{$("joinBtn").disabled=false;}
+};
+function enterGame(){
+  showStatus("playerStatus","Bạn đã vào phòng "+currentRoom.room_code+" ("+currentRoom.title+").");
+  $("gameArea").classList.remove("hidden");
+  $("roomStatusPill").textContent=currentRoom.status==="playing"?"Đang câu quà":currentRoom.status==="finished"?"Đã kết thúc":"Đang chờ lớp trưởng bắt đầu";
+  $("claimBtn").disabled=currentRoom.status!=="playing"||!!currentPlayer.won_gift_name;
+  if(currentPlayer.won_gift_name){$("giftResult").textContent="🎁 "+currentPlayer.won_gift_name;$("giftResult").classList.remove("hidden");}
+  refreshPlayers();
+  if(roomChannel)supabaseClient.removeChannel(roomChannel);
+  if(playersChannel)supabaseClient.removeChannel(playersChannel);
+  roomChannel=supabaseClient.channel("room-watch-"+currentRoom.id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:"id=eq."+currentRoom.id},payload=>{
+    currentRoom.status=payload.new.status;
+    $("roomStatusPill").textContent=currentRoom.status==="playing"?"Đang câu quà":currentRoom.status==="finished"?"Đã kết thúc":"Đang chờ lớp trưởng bắt đầu";
+    $("claimBtn").disabled=currentRoom.status!=="playing"||!!currentPlayer.won_gift_name;
+  }).subscribe();
+  playersChannel=supabaseClient.channel("players-watch-"+currentRoom.id).on("postgres_changes",{event:"*",schema:"public",table:"players",filter:"room_id=eq."+currentRoom.id},refreshPlayers).subscribe();
+}
+async function refreshPlayers(){
+  if(!currentRoom)return;
+  const {data,error}=await supabaseClient.from("players").select("player_name,won_gift_name,joined_at").eq("room_id",currentRoom.id).order("joined_at");
+  if(error){$("playersList").textContent="Không tải được danh sách người chơi.";return;}
+  $("playersList").innerHTML="";
+  if(!data.length){$("playersList").textContent="Chưa có người chơi.";return;}
+  const ul=document.createElement("ul");
+  data.forEach(p=>{const li=document.createElement("li");li.textContent=p.player_name+(p.won_gift_name?" — đã câu được quà":"");ul.appendChild(li);});
+  $("playersList").appendChild(ul);
+  const me=data.find(p=>p.player_name===currentPlayer.player_name);
+  if(me&&me.won_gift_name){currentPlayer.won_gift_name=me.won_gift_name;$("giftResult").textContent="🎁 "+me.won_gift_name;$("giftResult").classList.remove("hidden");$("claimBtn").disabled=true;}
+}
+$("claimBtn").onclick=async()=>{
+  if(!currentRoom||!currentPlayer||!currentToken)return;
+  $("claimBtn").disabled=true;$("claimBtn").textContent="Đang câu quà...";
+  try{
+    const {data,error}=await supabaseClient.rpc("claim_gift",{p_room_code:currentRoom.room_code,p_player_id:currentPlayer.id,p_token:currentToken});
+    if(error)throw error;
+    const gift=Array.isArray(data)&&data.length?data[0].gift_name:null;
+    if(!gift)throw new Error("Chưa nhận được kết quả. Hãy thử tải lại trang.");
+    currentPlayer.won_gift_name=gift;
+    $("giftResult").textContent="🎁 "+gift;$("giftResult").classList.remove("hidden");
+    $("claimBtn").textContent="Bạn đã nhận quà";showStatus("playerStatus","Chúc mừng bạn đã câu được quà!");
+    refreshPlayers();
+  }catch(e){showStatus("playerStatus",e.message||String(e));$("claimBtn").textContent="🎣 Thả cần câu quà";$("claimBtn").disabled=currentRoom.status!=="playing"||!!currentPlayer.won_gift_name;}
+};
+init();
+</script>
+</body>
+</html>
